@@ -8,11 +8,12 @@ OUTPUT_DIR="measure"/$1
 OUTPUT_PIDSTAT_FILE=$OUTPUT_DIR/pidstat
 OUTPUT_PERF_FILE=$OUTPUT_DIR/perf
 OUTPUT_PS_FILE=$OUTPUT_DIR/ps
-
 STEP=0.1
 
 rm -rf $OUTPUT_DIR
 mkdir -p $OUTPUT_DIR
+pwd
+echo $OUTPUT_DIR
 function ps_formated() {
      ps  --no-headers --format "start %cpu cp cputime %mem sz thcount " -p $SDL_PID
 }
@@ -46,3 +47,5 @@ do
 done
 
 python3 ./sdl_graphs.py --pidstat_file=$OUTPUT_PIDSTAT_FILE --ps_file=$OUTPUT_PS_FILE --output_dir=$OUTPUT_DIR --title=$1
+echo python3 ./sdl_graphs.py --pidstat_file=$OUTPUT_PIDSTAT_FILE --ps_file=$OUTPUT_PS_FILE --output_dir=$OUTPUT_DIR --title=$1
+ls $OUTPUT_DIR

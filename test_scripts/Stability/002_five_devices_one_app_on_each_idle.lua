@@ -1,6 +1,6 @@
 local actions = require("user_modules/sequences/actions")
 local common = require('test_scripts/TheSameApp/commonTheSameApp')
-local common_stability = require('Stability/common')
+local common_stability = require('test_scripts/Stability/common')
 local runner = require('user_modules/script_runner')
 local utils = require('user_modules/utils')
 --[[ Test Configuration ]]

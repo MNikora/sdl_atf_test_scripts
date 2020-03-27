@@ -1,9 +1,6 @@
-
 local utils = require('user_modules/utils')
--- local actions = require('user_modules/sequences/actions')
 
 local common = {}
-
 
 function common.Wait(actions, msec, count, title)
   if count == nil then
@@ -35,11 +32,9 @@ function common.IDLE(actions, msec, count)
   common.Wait(actions, msec, count, "IDLE for ")
 end
 
-
-
 function common.collect_metrics(filename)
-  local cmd = "bash ./measure_sdl.sh " .. filename.."_stat" .. " &" 
-   os.execute(cmd)
+  local cmd = "pwd && bash ./measure_sdl.sh " .. filename.."_stat" .. " &" 
+  os.execute(cmd)
 end
 
 function common.unregisterApp(actions, pAppId)
