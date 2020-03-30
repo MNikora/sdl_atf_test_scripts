@@ -6,6 +6,7 @@ local runner = require('user_modules/script_runner')
 local common = require("user_modules/sequences/actions")
 local utils = require("user_modules/utils")
 local SDL = require("SDL")
+local common_stability = require('test_scripts/Stability/common')
 
 --[[ Test Configuration ]]
 runner.testSettings.isSelfIncluded = false
@@ -223,6 +224,7 @@ end
 --[[ Scenario ]]
 runner.Title("Preconditions")
 runner.Step("Clean environment", common.preconditions)
+runner.Step("Start metrics_collecting", common_stability.collect_metrics, {"perform_interaction"})
 runner.Step("Start SDL, HMI, connect Mobile, start Session", common.start)
 runner.Step("Register App", common.registerApp)
 runner.Step("Activate App", common.activateApp)
