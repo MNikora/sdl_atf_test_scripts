@@ -2,14 +2,7 @@
 -- PerformInteraction - 500 times
 ---------------------------------------------------------------------------------------------------
 --[[ Required Shared libraries ]]
-local runner = require('user_modules/script_runner')
-local common = require("user_modules/sequences/actions")
-local utils = require("user_modules/utils")
-local SDL = require("SDL")
-local common_stability = require('test_scripts/Stability/common')
-
---[[ Test Configuration ]]
-runner.testSettings.isSelfIncluded = false
+local common = require('test_scripts/Stability/common')
 
 --[[ Local Variables ]]
 local numOfTries = 500
@@ -24,13 +17,8 @@ local putFileParams = {
   filePath = "files/icon.png"
 }
 
-local function getPathToFileInAppStorage(pFileName)
-  return SDL.AppStorage.path() .. common.getConfigAppParams().fullAppID .. "_"
-    .. utils.getDeviceMAC() .. "/" .. pFileName
-end
-
 local ImageValue = {
-  value = getPathToFileInAppStorage("icon.png"),
+  value = common.getPathToFileInAppStorage("icon.png"),
   imageType = "DYNAMIC",
 }
 
@@ -208,7 +196,7 @@ local function PI_ViaMANUAL_ONLY(pParams)
         common.getHMIConnection():SendNotification("TTS.Stopped")
         sendOnSystemContext("MAIN")
       end
-      common.run.runAfter(uiResponse, 1000)
+      common.runAfter(uiResponse, 1000)
     end)
   expectOnHMIStatusWithAudioStateChanged_PI("MANUAL")
   common.getMobileSession():ExpectResponse(cid, {
@@ -216,28 +204,25 @@ local function PI_ViaMANUAL_ONLY(pParams)
   })
 end
 
-local function putFile(pParams)
-  local cid = common.getMobileSession():SendRPC("PutFile", pParams.requestParams, pParams.filePath)
-  common.getMobileSession():ExpectResponse(cid, { success = true, resultCode = "SUCCESS" })
-end
-
 --[[ Scenario ]]
-runner.Title("Preconditions")
-runner.Step("Clean environment", common.preconditions)
-runner.Step("Start metrics_collecting", common_stability.collect_metrics, {"perform_interaction"})
-runner.Step("Start SDL, HMI, connect Mobile, start Session", common.start)
-runner.Step("Register App", common.registerApp)
-runner.Step("Activate App", common.activateApp)
-runner.Step("Upload icon file", putFile, { putFileParams })
-runner.Step("CreateInteractionChoiceSet with id 100", createInteractionChoiceSet, { 100 })
-runner.Step("CreateInteractionChoiceSet with id 200", createInteractionChoiceSet, { 200 })
-runner.Step("CreateInteractionChoiceSet with id 300", createInteractionChoiceSet, { 300 })
-runner.Step("CreateInteractionChoiceSet no VR commands with id 400", createInteractionChoiceSet_noVR, { 400 })
+common.Title("Preconditions")
+common.Step("Clean environment", common.preconditions)
+common.Step("Start SDL and HMI", common.start, { "009_perform_interaction" })
+common.Step("Connect Mobile", common.connectMobile)
+common.Step("Register App", common.registerApp)
+common.Step("Activate App", common.activateApp)
+common.Step("Upload icon file", common.putFile, { putFileParams.requestParams, putFileParams.filePath })
+common.Step("CreateInteractionChoiceSet with id 100", createInteractionChoiceSet, { 100 })
+common.Step("CreateInteractionChoiceSet with id 200", createInteractionChoiceSet, { 200 })
+common.Step("CreateInteractionChoiceSet with id 300", createInteractionChoiceSet, { 300 })
+common.Step("CreateInteractionChoiceSet no VR commands with id 400", createInteractionChoiceSet_noVR, { 400 })
 
-runner.Title("Test")
+common.Title("Test")
 for i = 1, numOfTries do
-  runner.Step("PerformInteraction " .. i, PI_ViaMANUAL_ONLY, { requestParams })
+  common.Step("PerformInteraction " .. i, PI_ViaMANUAL_ONLY, { requestParams })
 end
 
-runner.Title("Postconditions")
-runner.Step("Stop SDL", common.postconditions)
+common.Step("IDLE", common.IDLE, { 1000, 10 })
+
+common.Title("Postconditions")
+common.Step("Stop SDL", common.postconditions)

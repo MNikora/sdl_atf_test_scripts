@@ -1,24 +1,23 @@
 ---------------------------------------------------------------------------------------------------
--- 1 application - 1000 registrations and activations
+-- PTU through Mobile - 500 times
 ---------------------------------------------------------------------------------------------------
 --[[ Required Shared libraries ]]
 local common = require('test_scripts/Stability/common')
 
 --[[ Local Variables ]]
-local numOfTries = 1000
+local numOfTries = 500
 
 --[[ Scenario ]]
 common.Title("Preconditions")
 common.Step("Clean environment", common.preconditions)
-common.Step("Start SDL and HMI", common.start, { "004_one_app_multiple_reg_act" })
+common.Step("Start SDL and HMI", common.start, { "006_ptu_through_mobile" })
+common.Step("Connect Mobile", common.connectMobile)
 
 common.Title("Test")
-common.Step("Connect Mobile", common.connectMobile)
 for i = 1, numOfTries do
-  local app = 1
-  common.Step("Register App " .. i, common.registerNoPTU, { app })
-  common.Step("Activate App " .. i, common.activateApp, { app })
-  common.Step("Unregister App " .. i, common.unregisterApp, { app })
+  common.Step("Register App " .. i, common.registerApp, { i })
+  common.Step("PTU", common.policyTableUpdate)
+  common.Step("Unregister App " .. i, common.unregisterApp, { i })
 end
 
 common.Step("IDLE", common.IDLE, { 1000, 10 })

@@ -2,13 +2,7 @@
 -- PerformAudioPassThru - 500 times
 ---------------------------------------------------------------------------------------------------
 --[[ Required Shared libraries ]]
-local runner = require('user_modules/script_runner')
-local common = require("user_modules/sequences/actions")
-local utils = require("user_modules/utils")
-local common_stability = require('test_scripts/Stability/common')
-
---[[ Test Configuration ]]
-runner.testSettings.isSelfIncluded = false
+local common = require('test_scripts/Stability/common')
 
 --[[ Local Variables ]]
 local numOfTries = 500
@@ -45,7 +39,7 @@ local requestUiParams = {
 }
 
 local requestTtsParams = {
-  ttsChunks = utils.cloneTable(requestParams.initialPrompt),
+  ttsChunks = common.cloneTable(requestParams.initialPrompt),
   speakType = "AUDIO_PASS_THRU"
 }
 
@@ -70,7 +64,7 @@ local function performAudioPassThru(pParams)
         common.getHMIConnection():SendResponse(data.id, data.method, "SUCCESS", {})
         common.getHMIConnection():SendNotification("TTS.Stopped")
       end
-      common.run.runAfter(ttsSpeakResponse, 100)
+      common.runAfter(ttsSpeakResponse, 100)
     end)
   common.getHMIConnection():ExpectRequest("UI.PerformAudioPassThru", pParams.requestUiParams)
   :Do(function(_, data)
@@ -79,7 +73,7 @@ local function performAudioPassThru(pParams)
         common.getHMIConnection():SendResponse(data.id, data.method, "SUCCESS", {})
         sendOnSystemContext("MAIN", pParams.requestUiParams.appID)
       end
-      common.run.runAfter(uiResponse, 1500)
+      common.runAfter(uiResponse, 1500)
     end)
   common.getHMIConnection():ExpectNotification("UI.OnRecordStart", { appID = pParams.requestUiParams.appID })
   common.getMobileSession():ExpectNotification("OnHMIStatus",
@@ -93,17 +87,17 @@ local function performAudioPassThru(pParams)
 end
 
 --[[ Scenario ]]
-runner.Title("Preconditions")
-runner.Step("Clean environment", common.preconditions)
-runner.Step("Start metrics_collecting", common_stability.collect_metrics, {"perform_audio_pass_thru"})
-runner.Step("Start SDL, HMI, connect Mobile, start Session", common.start)
-runner.Step("Register App", common.registerApp)
-runner.Step("Activate App", common.activateApp)
+common.Title("Preconditions")
+common.Step("Clean environment", common.preconditions)
+common.Step("Start SDL and HMI", common.start, { "010_perform_audio_pass_thru" })
+common.Step("Connect Mobile", common.connectMobile)
+common.Step("Register App", common.registerApp)
+common.Step("Activate App", common.activateApp)
 
-runner.Title("Test")
+common.Title("Test")
 for i = 1, numOfTries do
-  runner.Step("PerformAudioPassThru " .. i, performAudioPassThru, { allParams })
+  common.Step("PerformAudioPassThru " .. i, performAudioPassThru, { allParams })
 end
 
-runner.Title("Postconditions")
-runner.Step("Stop SDL", common.postconditions)
+common.Title("Postconditions")
+common.Step("Stop SDL", common.postconditions)

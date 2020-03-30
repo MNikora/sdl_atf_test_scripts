@@ -2,42 +2,32 @@
 -- PutFile - 500 times
 ---------------------------------------------------------------------------------------------------
 --[[ Required Shared libraries ]]
-local runner = require('user_modules/script_runner')
-local common = require("user_modules/sequences/actions")
-local common_stability = require('test_scripts/Stability/common')
-
---[[ Test Configuration ]]
-runner.testSettings.isSelfIncluded = false
+local common = require('test_scripts/Stability/common')
 
 --[[ Local Variables ]]
 local numOfFiles = 500
 
---[[ Local Functions ]]
-local function putFile(pFileId)
+--[[ Scenario ]]
+common.Title("Preconditions")
+common.Step("Clean environment", common.preconditions)
+common.Step("Start SDL and HMI", common.start, { "008_put_file" })
+common.Step("Connect Mobile", common.connectMobile)
+common.Step("Register App", common.registerApp)
+common.Step("Activate App", common.activateApp)
+
+common.Title("Test")
+for i = 1, numOfFiles do
   local filePath = "files/icon_bmp.bmp"
   local params = {
-    syncFileName = "icon_" .. pFileId .. ".bmp",
+    syncFileName = "icon_" .. i .. ".bmp",
     fileType = "GRAPHIC_PNG",
     persistentFile = false,
     systemFile = false
   }
-  local cid = common.getMobileSession():SendRPC("PutFile", params, filePath)
-  common.getMobileSession():ExpectResponse(cid, { success = true, resultCode = "SUCCESS" })
-  common.run.wait(500)
+  common.Step("PutFile " .. i, common.putFile, { params, filePath })
 end
 
---[[ Scenario ]]
-runner.Title("Preconditions")
-runner.Step("Clean environment", common.preconditions)
-runner.Step("Start metrics_collecting", common_stability.collect_metrics, {"put_file"})
-runner.Step("Start SDL, HMI, connect Mobile, start Session", common.start)
-runner.Step("Register App", common.registerApp)
-runner.Step("Activate App", common.activateApp)
+common.Step("IDLE", common.IDLE, { 1000, 10 })
 
-runner.Title("Test")
-for i = 1, numOfFiles do
-  runner.Step("PutFile " .. i, putFile, { i })
-end
-
-runner.Title("Postconditions")
-runner.Step("Stop SDL", common.postconditions)
+common.Title("Postconditions")
+common.Step("Stop SDL", common.postconditions)

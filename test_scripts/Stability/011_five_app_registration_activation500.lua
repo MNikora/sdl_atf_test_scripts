@@ -1,29 +1,39 @@
-local actions = require("user_modules/sequences/actions")
-local runner = require('user_modules/script_runner')
-local common_stability = require('test_scripts/Stability/common')
---[[ Test Configuration ]]
-runner.testSettings.isSelfIncluded = false
+---------------------------------------------------------------------------------------------------
+-- 5 applications - 500 registrations and activations
+---------------------------------------------------------------------------------------------------
+--[[ Required Shared libraries ]]
+local common = require('test_scripts/Stability/common')
 
+--[[ Local Variables ]]
+local numOfTries = 500
 
-runner.Title("Preconditions")
-runner.Step("Clean environment", actions.preconditions)
-runner.Step("Start metrics_collecting", common_stability.collect_metrics, {"five_apps_multireg"})
-runner.Step("Start SDL, HMI, connect Mobile, start Session", actions.start)
-
-for i = 1, 200 do
-  -- local app = 1
-  for app = 1, 5 do
-    runner.Step("RAI " .. i, actions.registerAppWOPTU, {app})
-  end
-  for app = 1, 5 do
-    runner.Step("Activate App " .. i, actions.activateApp, {app})
-  end
-  runner.Step("1 second waiting ",common_stability.Wait, {actions, 1000, 1}) 
-  for app = 1, 5 do
-    runner.Step("Unregister App " .. i, common_stability.unregisterApp, {actions,app})
-  end
-  runner.Step("Wait before next RAI: 3 seconds ",common_stability.Wait, {actions, 1000, 3}) 
+--[[ Local Functions ]]
+local function activateApp(pAppId)
+  common.activateApp(pAppId)
+  common.delay(2000)
 end
-runner.Step("IDLE ",common_stability.IDLE, {actions, 1000, 600}) -- 15 minutes
--- runner.Title("Postconditions")
-runner.Step("Stop SDL", actions.postconditions)
+
+--[[ Scenario ]]
+common.Title("Preconditions")
+common.Step("Clean environment", common.preconditions)
+common.Step("Start SDL and HMI", common.start, { "011_five_apps_multiple_reg_act" })
+
+common.Title("Test")
+common.Step("Connect Mobile", common.connectMobile)
+for try = 1, numOfTries do
+  common.Title("Try " .. try)
+  for app = 1, 5 do
+    common.Step("Register App " .. app, common.registerNoPTU, { app })
+  end
+  for app = 1, 5 do
+    common.Step("Activate " .. app, activateApp, { app })
+  end
+  for app = 1, 5 do
+    common.Step("Unregister " .. app, common.unregisterApp, { app })
+  end
+end
+
+common.Step("IDLE", common.IDLE, { 1000, 10 })
+
+common.Title("Postconditions")
+common.Step("Stop SDL", common.postconditions)

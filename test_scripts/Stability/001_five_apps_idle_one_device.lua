@@ -1,17 +1,24 @@
-local actions = require("user_modules/sequences/actions")
-local runner = require('user_modules/script_runner')
-local common_stability = require('test_scripts/Stability/common')
---[[ Test Configuration ]]
-runner.testSettings.isSelfIncluded = false
+---------------------------------------------------------------------------------------------------
+-- 1 device - 5 applications
+---------------------------------------------------------------------------------------------------
+--[[ Required Shared libraries ]]
+local common = require('test_scripts/Stability/common')
 
-runner.Title("Preconditions")
-runner.Step("Clean environment", actions.preconditions)
-runner.Step("Start metrics_collecting", common_stability.collect_metrics, {"five_apps_idle"})
-runner.Step("Start SDL, HMI, connect Mobile, start Session", actions.start)
+--[[ Local Variables ]]
+local numOfApps = 5
 
-for app = 1, 5 do
-  runner.Step("RAI " .. app, actions.registerAppWOPTU, {app})
+--[[ Scenario ]]
+common.Title("Preconditions")
+common.Step("Clean environment", common.preconditions)
+common.Step("Start SDL and HMI", common.start, { "001_five_apps_idle" })
+
+common.Title("Test")
+common.Step("Connect Mobile", common.connectMobile)
+for app = 1, numOfApps do
+  common.Step("RAI " .. app, common.registerNoPTU, { app })
 end
-runner.Step("IDLE ",common_stability.IDLE, {actions, 1000, 600}) -- 15 minutes
-runner.Title("Postconditions")
-runner.Step("Stop SDL", actions.postconditions)
+
+common.Step("IDLE", common.IDLE, { 1000, 10 })
+
+common.Title("Postconditions")
+common.Step("Stop SDL", common.postconditions)

@@ -15,9 +15,8 @@ mkdir -p $OUTPUT_DIR
 pwd
 echo $OUTPUT_DIR
 function ps_formated() {
-     ps  --no-headers --format "start %cpu cp cputime %mem sz thcount " -p $SDL_PID
+    ps  --no-headers --format "start %cpu cp cputime %mem sz thcount " -p $SDL_PID
 }
-
 
 function measure_ps() {
     PS_OUTPUT=$(ps_formated)
@@ -31,21 +30,21 @@ function measure_pid_stat() {
     echo $STAT_OUTPUT >> $OUTPUT_PIDSTAT_FILE
 }
 
-echo Whait for SDL start
+echo "Wait for SDL start"
 until SDL_PID=$(pidof smartDeviceLinkCore)
-do   
+do
     sleep $STEP
     printf "."
 done
 
 sudo perf stat -p $SDL_PID > $OUTPUT_PERF_FILE &
 while SDL_PID=$(pidof smartDeviceLinkCore)
-do   
+do
     measure_pid_stat
     measure_ps
     sleep $STEP
 done
 
 python3 ./sdl_graphs.py --pidstat_file=$OUTPUT_PIDSTAT_FILE --ps_file=$OUTPUT_PS_FILE --output_dir=$OUTPUT_DIR --title=$1
-echo python3 ./sdl_graphs.py --pidstat_file=$OUTPUT_PIDSTAT_FILE --ps_file=$OUTPUT_PS_FILE --output_dir=$OUTPUT_DIR --title=$1
-ls $OUTPUT_DIR
+# echo python3 ./sdl_graphs.py --pidstat_file=$OUTPUT_PIDSTAT_FILE --ps_file=$OUTPUT_PS_FILE --output_dir=$OUTPUT_DIR --title=$1
+# ls $OUTPUT_DIR
