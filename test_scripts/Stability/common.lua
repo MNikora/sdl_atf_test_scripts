@@ -51,4 +51,34 @@ function common.unregisterApp(actions, pAppId)
 end
 
 
+function fsize (file)
+        file = io.open(file,"r")
+        local current = file:seek()      -- get current position
+        local size = file:seek("end")    -- get file size
+        file:seek("set", current)        -- restore position
+        return size
+end
+
+--[[ @StartStreaming: Start streaming
+--! @parameters:
+--! pService - service value
+--! pFile -file for streaming
+--! pAppId - app id value for session
+--! @return: none
+--]]
+function common.StartVideoStreaming(actions, pFile, pAppId, bandwith, endCallback)
+  if not pAppId then pAppId = 1 end
+  utils.cprint(33, "Bandwith : " .. bandwith / 1000000 .. "mb/s")
+  local filesize = fsize(pFile)
+  utils.cprint(33, "File size : " .. filesize/1000 .. " mb")
+  local estimated_time = filesize / bandwith 
+  utils.cprint(33, "Estimated time : " .. estimated_time .. "s")
+  local estimated_timems = estimated_time * 1000
+  actions.getMobileSession(pAppId):StartStreaming(11, pFile, bandwith, endCallback)
+  actions.getHMIConnection():ExpectNotification("Navigation.OnVideoDataStreaming"):Times(AnyNumber())
+  utils.cprint(33, "Streaming...")
+  common.Wait(actions, estimated_timems / 10, 15, "Wait for file streaming ")
+end
+
+
 return common
