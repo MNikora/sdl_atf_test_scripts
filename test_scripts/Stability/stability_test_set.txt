@@ -1,0 +1,5 @@
+./test_scripts/Stability/001_five_apps_idle_one_device.lua
+./test_scripts/Stability/002_five_devices_one_app_on_each_idle.lua
+./test_scripts/Stability/003_five_devices_five_apps_on_each_idle.lua
+./test_scripts/Stability/004_one_app_registration_activation1000.lua
+./test_scripts/Stability/005_five_app_registration_activation500.lua
