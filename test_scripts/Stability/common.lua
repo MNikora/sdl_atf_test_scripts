@@ -102,7 +102,8 @@ local function fsize(file)
   return size
 end
 
-function common.startVideoStreaming(pFile, pAppId, bandwith)
+function common.startVideoStreaming(pFile, pAppId, bandwith, wait)
+  if wait == nil then wait = true end
   local function round(value)
     return math.floor(value + 0.5)
   end
@@ -121,7 +122,9 @@ function common.startVideoStreaming(pFile, pAppId, bandwith)
           actions.hmi.getConnection():SendResponse(data.id, data.method, "SUCCESS", { })
         end)
       utils.cprint(33, "Streaming...")
-      common.wait(1000*10, estimated_time/10, "Wait for file streaming ")
+      if wait == true then
+        common.wait(1000*10, estimated_time/10, "Wait for file streaming ")
+      end
     end)
 end
 
