@@ -6,7 +6,7 @@ local common = require('test_scripts/Stability/common')
 
 --[[ Local Variables ]]
 local fileName = os.tmpname()
-local fileSize = 5 -- Gb
+local fileSize = 1 -- Gb
 
 --[[ Local Functions ]]
 local function createFile()
