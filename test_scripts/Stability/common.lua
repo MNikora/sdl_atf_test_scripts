@@ -6,6 +6,7 @@ local test = require("user_modules/dummy_connecttest")
 local utils = require('user_modules/utils')
 local runner = require('user_modules/script_runner')
 local SDL = require("SDL")
+local ATF = require("ATF")
 
 --[[ Test Configuration ]]
 runner.testSettings.isSelfIncluded = false
@@ -87,8 +88,10 @@ function common.IDLE(msec, count)
 end
 
 function common.collect_metrics(filename)
-  local cmd = "pwd && bash ./measure_sdl.sh " .. filename.."_stat" .. " &"
-  os.execute(cmd)
+  local cmd = "cd /home/developer/sdl/sdl_atf_test_scripts/ && bash ./measure_sdl.sh " .. filename.."_stat &" 
+  -- local cmd = "sleep 20&"
+  local isSuccess, data = ATF.remoteUtils.app:ExecuteCommand(cmd)
+  -- os.execute(cmd)
 end
 
 local function fsize(file)

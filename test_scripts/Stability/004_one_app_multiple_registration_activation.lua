@@ -21,7 +21,7 @@ for i = 1, numOfTries do
   common.Step("Unregister App " .. i, common.unregisterApp, { app })
 end
 
-common.Step("IDLE", common.IDLE, { 1000, 10 })
+common.Step("IDLE", common.IDLE, { 1000, 300 })
 
 common.Title("Postconditions")
 common.Step("Stop SDL", common.postconditions)

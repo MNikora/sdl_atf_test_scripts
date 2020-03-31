@@ -33,7 +33,7 @@ for try = 1, numOfTries do
   end
 end
 
-common.Step("IDLE", common.IDLE, { 1000, 10 })
+common.Step("IDLE", common.IDLE, { 1000, 300 })
 
 common.Title("Postconditions")
 common.Step("Stop SDL", common.postconditions)

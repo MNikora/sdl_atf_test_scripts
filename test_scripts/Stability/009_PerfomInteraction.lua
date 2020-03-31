@@ -222,7 +222,7 @@ for i = 1, numOfTries do
   common.Step("PerformInteraction " .. i, PI_ViaMANUAL_ONLY, { requestParams })
 end
 
-common.Step("IDLE", common.IDLE, { 1000, 10 })
+common.Step("IDLE", common.IDLE, { 1000, 300 })
 
 common.Title("Postconditions")
 common.Step("Stop SDL", common.postconditions)

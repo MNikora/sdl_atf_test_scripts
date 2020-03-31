@@ -31,7 +31,7 @@ common.Step("Activate App", common.activateApp)
 common.Title("Test")
 common.Step("Start video streaming", common.startVideoStreaming, { fileName, 1, 5000000 })
 
-common.Step("IDLE", common.IDLE, { 1000, 10 })
+common.Step("IDLE", common.IDLE, { 1000, 300 })
 
 common.Title("Postconditions")
 common.Step("Stop video streaming", common.stopVideoStreaming, { fileName })

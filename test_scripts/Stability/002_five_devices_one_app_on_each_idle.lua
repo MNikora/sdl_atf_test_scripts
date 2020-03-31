@@ -18,7 +18,7 @@ for app = 1, numOfAppAndDevices do
   common.Step("RAI " .. app, common.registerNoPTU, { app, app })
 end
 
-common.Step("IDLE", common.IDLE, { 1000, 10 })
+common.Step("IDLE", common.IDLE, { 1000, 300 })
 
 common.Title("Postconditions")
 common.Step("Stop SDL", common.postconditions)

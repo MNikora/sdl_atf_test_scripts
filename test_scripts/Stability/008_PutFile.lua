@@ -27,7 +27,7 @@ for i = 1, numOfFiles do
   common.Step("PutFile " .. i, common.putFile, { params, filePath })
 end
 
-common.Step("IDLE", common.IDLE, { 1000, 10 })
+common.Step("IDLE", common.IDLE, { 1000, 300 })
 
 common.Title("Postconditions")
 common.Step("Stop SDL", common.postconditions)

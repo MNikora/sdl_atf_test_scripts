@@ -1,4 +1,4 @@
-#! /bin/env bash
+#!/usr/bin/env bash
 
 # apt-get install sysstat linux-tools-common linux-tools-generic linux-tools-`uname -r`
 
