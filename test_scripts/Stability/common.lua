@@ -7,6 +7,7 @@ local utils = require('user_modules/utils')
 local runner = require('user_modules/script_runner')
 local SDL = require("SDL")
 local ATF = require("ATF")
+local commonSmoke = require('test_scripts/Smoke/commonSmoke')
 
 --[[ Test Configuration ]]
 runner.testSettings.isSelfIncluded = false
@@ -14,6 +15,8 @@ runner.testSettings.isSelfIncluded = false
 --[[ Module ]]
 local common = {}
 local appData = utils.cloneTable(actions.app.getParams(1))
+local interface
+local device = {}
 
 --[[ Proxy Functions ]]
 common.Title = runner.Title
@@ -32,6 +35,25 @@ common.delay = actions.run.wait
 common.unregisterApp = actions.app.unRegister
 
 --[[ Common Functions ]]
+local function execCmd(pCmd)
+  local handle = io.popen(pCmd)
+  local result = handle:read("*a")
+  handle:close()
+  return string.gsub(result, "[\n\r]+", "")
+end
+
+local function generateDeviceData()
+  interface = execCmd("ip addr | grep " .. config.mobileHost ..  " | rev | awk '{print $1}' | rev")
+  utils.cprint(35, "Interface:", interface)
+  utils.cprint(35, "IP-addresses:")
+  for i = 1, 5 do
+    device[i] = string.match(config.mobileHost, ".+%.") .. 50 + i
+    utils.cprint(35, " " .. device[i])
+  end
+end
+
+generateDeviceData()
+
 local createSession_Orig = actions.mobile.createSession
 function actions.mobile.createSession(pAppId, pMobConnId)
   local sessionConfig = {
@@ -88,14 +110,13 @@ function common.IDLE(msec, count)
 end
 
 function common.collect_metrics(filename)
-  local cmd = "bash ./measure_sdl.sh " .. filename.."_stat &"
+  local cmd = "bash ./tools/measure_sdl.sh " .. filename.."_stat"
   if config.remoteConnection.enabled == true then
-    cmd = "cd /home/developer/sdl/sdl_atf_test_scripts/ && " .. cmd
+    cmd = "cd .. && " .. cmd .. " --remote &"
     ATF.remoteUtils.app:ExecuteCommand(cmd)
   else
-    os.execute(cmd)
+    os.execute(cmd .. " &")
   end
-
 end
 
 local function fsize(file)
@@ -151,16 +172,6 @@ function common.start(filename)
 end
 
 function common.connectMobile(pMobConnId)
-  local extraDevices = {
-    [2] = "1.0.0.1",
-    [3] = "192.168.100.199",
-    [4] = "10.42.0.1",
-    [5] = "8.8.8.8"
-  }
-  if pMobConnId and pMobConnId > 1 then
-    utils.addNetworkInterface(pMobConnId, extraDevices[pMobConnId])
-    actions.mobile.createConnection(pMobConnId, extraDevices[pMobConnId], config.mobilePort)
-  end
   local event = actions.run.createEvent()
   actions.mobile.connect(pMobConnId)
   :Do(function()
@@ -172,10 +183,25 @@ function common.connectMobile(pMobConnId)
   return actions.hmi.getConnection():ExpectEvent(event, "Start event")
 end
 
+function common.connectMobileEx(pMobConnId)
+  local function addDevice(pId)
+    if execCmd("ip addr | grep " .. device[pId]) == "" then
+      os.execute("ip addr add " .. device[pId] .. "/24 dev " .. interface)
+    end
+  end
+  addDevice(pMobConnId)
+  commonSmoke.createConnection(pMobConnId, device[pMobConnId])
+end
+
 function common.postconditions()
   actions.postconditions()
+  local function removeDevice(pId)
+    if execCmd("ip addr | grep " .. device[pId]) ~= "" then
+      os.execute("ip addr del " .. device[pId] .. "/24 dev " .. interface)
+    end
+  end
   for i = 2, 5 do
-    if test.mobileConnections[i] then utils.deleteNetworkInterface(i) end
+    if test.mobileConnections[i] then removeDevice(i) end
   end
   actions.run.wait(2000)
 end

@@ -14,7 +14,7 @@ common.Step("Start SDL and HMI", common.start, { "002_five_devices_one_app_idle"
 
 common.Title("Test")
 for app = 1, numOfAppAndDevices do
-  common.Step("Connect Mobile", common.connectMobile, { app })
+  common.Step("Connect Mobile", common.connectMobileEx, { app })
   common.Step("RAI " .. app, common.registerNoPTU, { app, app })
 end
 

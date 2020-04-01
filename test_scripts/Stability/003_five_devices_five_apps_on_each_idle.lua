@@ -16,7 +16,7 @@ common.Step("Start SDL and HMI", common.start, { "003_five_devices_fice_apps_on_
 common.Title("Test")
 local appId = 0
 for deviceId = 1, numOfDevices do
-  common.Step("Connect Mobile", common.connectMobile, { deviceId })
+  common.Step("Connect Mobile", common.connectMobileEx, { deviceId })
   for appNum = 1, numOfApps do
     appId = appId + 1
     common.Step("RAI " .. deviceId .. " " .. appNum .. " " .. appId, common.registerNoPTU, { appId, deviceId })
