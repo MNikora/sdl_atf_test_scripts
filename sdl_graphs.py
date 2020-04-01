@@ -38,15 +38,14 @@ def parse_ps(line):
 
 def sdl_start_time_docker(lines):
     line = lines[0].split()
-    print(line)
-    print(line[0])
+    
     process_start = datetime.strptime(line[0][:-3], "%H:%M:%S:%f")
     return process_start
     
 def parse_docker(line):
     # docker stats --format "{{.Name}} {{.CPUPerc}} {{.MemUsage}}  {{.PIDs}}"  --no-stream 
     columns = generator(line)
-    print (columns)
+    
     next_col  = lambda : next(columns)
     record = {}
     record["time"] = datetime.strptime(next_col()[:-3], "%H:%M:%S:%f")
@@ -56,7 +55,7 @@ def parse_docker(line):
     slash = next_col()
     record["MemLimit"] = next_col()
     record["PIDs"] = int(next_col())
-    print(line,record)
+    
     return record
 
 def graphs(record_type):
