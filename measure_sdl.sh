@@ -3,7 +3,7 @@
 # apt-get install sysstat linux-tools-common linux-tools-generic linux-tools-`uname -r`
 
 SDL_PID=$(pidof smartDeviceLinkCore)
-
+REMOTE=false
 OUTPUT_DIR="measure"/$1
 OUTPUT_PIDSTAT_FILE=$OUTPUT_DIR/pidstat.log
 OUTPUT_PERF_FILE=$OUTPUT_DIR/perf.log
@@ -11,6 +11,8 @@ OUTPUT_PS_FILE=$OUTPUT_DIR/ps.log
 OUTPUT_DOCKER_FILE=$OUTPUT_DIR/docker.log
 
 STEP=1
+
+if [ -n $1 ] && [ "$1" = "--remote" ]; then REMOTE=true; fi
 
 rm -rf $OUTPUT_DIR
 mkdir -p $OUTPUT_DIR
@@ -51,10 +53,11 @@ while SDL_PID=$(pidof smartDeviceLinkCore)
 do
     measure_pid_stat
     measure_ps
-    measure_docker
+    if [ $REMOTE = true ]; then measure_docker; fi
     sleep $STEP
 done
 
-python3 ./sdl_graphs.py --docker_file=$OUTPUT_DOCKER_FILE --pidstat_file=$OUTPUT_PIDSTAT_FILE --ps_file=$OUTPUT_PS_FILE --output_dir=$OUTPUT_DIR --title=$1
-# echo python3 ./sdl_graphs.py --pidstat_file=$OUTPUT_PIDSTAT_FILE --ps_file=$OUTPUT_PS_FILE --output_dir=$OUTPUT_DIR --title=$1
-# ls $OUTPUT_DIR
+PARAMS="--pidstat_file=$OUTPUT_PIDSTAT_FILE --ps_file=$OUTPUT_PS_FILE --output_dir=$OUTPUT_DIR --title=$1"
+if [ $REMOTE = true ]; then PARAMS="$PARAMS --docker_file=$OUTPUT_DOCKER_FILE"; fi
+
+python3 ./sdl_graphs.py $PARAMS

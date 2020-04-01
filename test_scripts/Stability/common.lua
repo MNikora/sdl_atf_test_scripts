@@ -88,10 +88,14 @@ function common.IDLE(msec, count)
 end
 
 function common.collect_metrics(filename)
-  local cmd = "cd /home/developer/sdl/sdl_atf_test_scripts/ && bash ./measure_sdl.sh " .. filename.."_stat &" 
-  -- local cmd = "sleep 20&"
-  local isSuccess, data = ATF.remoteUtils.app:ExecuteCommand(cmd)
-  -- os.execute(cmd)
+  local cmd = "bash ./measure_sdl.sh " .. filename.."_stat &"
+  if config.remoteConnection.enabled == true then
+    cmd = "cd /home/developer/sdl/sdl_atf_test_scripts/ && " .. cmd
+    ATF.remoteUtils.app:ExecuteCommand(cmd)
+  else
+    os.execute(cmd)
+  end
+
 end
 
 local function fsize(file)
@@ -173,6 +177,7 @@ function common.postconditions()
   for i = 2, 5 do
     if test.mobileConnections[i] then utils.deleteNetworkInterface(i) end
   end
+  actions.run.wait(2000)
 end
 
 function common.ptuViaHMI()
