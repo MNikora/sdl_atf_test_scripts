@@ -5,10 +5,12 @@
 SDL_PID=$(pidof smartDeviceLinkCore)
 
 OUTPUT_DIR="measure"/$1
-OUTPUT_PIDSTAT_FILE=$OUTPUT_DIR/pidstat
-OUTPUT_PERF_FILE=$OUTPUT_DIR/perf
-OUTPUT_PS_FILE=$OUTPUT_DIR/ps
-STEP=0.1
+OUTPUT_PIDSTAT_FILE=$OUTPUT_DIR/pidstat.log
+OUTPUT_PERF_FILE=$OUTPUT_DIR/perf.log
+OUTPUT_PS_FILE=$OUTPUT_DIR/ps.log
+OUTPUT_DOCKER_FILE=$OUTPUT_DIR/docker.log
+
+STEP=1
 
 rm -rf $OUTPUT_DIR
 mkdir -p $OUTPUT_DIR
@@ -30,6 +32,13 @@ function measure_pid_stat() {
     echo $STAT_OUTPUT >> $OUTPUT_PIDSTAT_FILE
 }
 
+function measure_docker() {
+    RECORD=$(docker stats --format "{{.Name}} {{.CPUPerc}} {{.MemUsage}}  {{.PIDs}}"  --no-stream | grep remote_sdl)
+    echo $RECORD
+    TIME=$(date +'%T:%N')
+    echo $TIME $RECORD >> $OUTPUT_DOCKER_FILE
+}
+
 echo "Wait for SDL start"
 until SDL_PID=$(pidof smartDeviceLinkCore)
 do
@@ -42,9 +51,10 @@ while SDL_PID=$(pidof smartDeviceLinkCore)
 do
     measure_pid_stat
     measure_ps
+    measure_docker
     sleep $STEP
 done
 
-python3 ./sdl_graphs.py --pidstat_file=$OUTPUT_PIDSTAT_FILE --ps_file=$OUTPUT_PS_FILE --output_dir=$OUTPUT_DIR --title=$1
+python3 ./sdl_graphs.py --docker_file=$OUTPUT_DOCKER_FILE --pidstat_file=$OUTPUT_PIDSTAT_FILE --ps_file=$OUTPUT_PS_FILE --output_dir=$OUTPUT_DIR --title=$1
 # echo python3 ./sdl_graphs.py --pidstat_file=$OUTPUT_PIDSTAT_FILE --ps_file=$OUTPUT_PS_FILE --output_dir=$OUTPUT_DIR --title=$1
 # ls $OUTPUT_DIR
