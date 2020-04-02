@@ -2,7 +2,6 @@
 -- Stability common module
 ---------------------------------------------------------------------------------------------------
 local actions = require("user_modules/sequences/actions")
-local test = require("user_modules/dummy_connecttest")
 local utils = require('user_modules/utils')
 local runner = require('user_modules/script_runner')
 local SDL = require("SDL")
