@@ -11,12 +11,12 @@ local commonSmoke = require('test_scripts/Smoke/commonSmoke')
 
 --[[ Test Configuration ]]
 runner.testSettings.isSelfIncluded = false
+config.defaultProtocolVersion = 3
 
 --[[ Module ]]
 local common = {}
 local appData = utils.cloneTable(actions.app.getParams(1))
-local interface
-local device = {}
+local deviceData = { interface = nil, device = { }}
 
 --[[ Proxy Functions ]]
 common.Title = runner.Title
@@ -41,18 +41,6 @@ local function execCmd(pCmd)
   handle:close()
   return string.gsub(result, "[\n\r]+", "")
 end
-
-local function generateDeviceData()
-  interface = execCmd("ip addr | grep " .. config.mobileHost ..  " | rev | awk '{print $1}' | rev")
-  utils.cprint(35, "Interface:", interface)
-  utils.cprint(35, "IP-addresses:")
-  for i = 1, 5 do
-    device[i] = string.match(config.mobileHost, ".+%.") .. 50 + i
-    utils.cprint(35, " " .. device[i])
-  end
-end
-
-generateDeviceData()
 
 local createSession_Orig = actions.mobile.createSession
 function actions.mobile.createSession(pAppId, pMobConnId)
@@ -184,14 +172,25 @@ function common.connectMobile(pMobConnId)
 end
 
 function common.connectMobileEx(pMobConnId)
+  local function generateDeviceData(pId)
+    local interface = execCmd("ip addr | grep " .. config.mobileHost ..  " | rev | awk '{print $1}' | rev")
+    utils.cprint(35, "Interface:", interface)
+    local device = string.match(config.mobileHost, ".+%.") .. 50 + pId
+    utils.cprint(35, "IP-address:", device)
+    deviceData.interface = interface
+    deviceData.device[pId] = device
+  end
+  generateDeviceData(pMobConnId)
+
   local function addDevice(pId)
-    if execCmd("ip addr | grep " .. device[pId]) == "" then
-      os.execute("ip addr add " .. device[pId] .. "/24 dev " .. interface)
+    if execCmd("ip addr | grep " .. deviceData.device[pId]) == "" then
+      os.execute("ip addr add " .. deviceData.device[pId] .. "/24 dev " .. deviceData.interface)
     end
   end
   addDevice(pMobConnId)
+
   actions.mobile.connect = function(pId)
-    return commonSmoke.createConnection(pId, device[pId])
+    return commonSmoke.createConnection(pId, deviceData.device[pId])
   end
   return common.connectMobile(pMobConnId)
 end
@@ -199,12 +198,12 @@ end
 function common.postconditions()
   actions.postconditions()
   local function removeDevice(pId)
-    if execCmd("ip addr | grep " .. device[pId]) ~= "" then
-      os.execute("ip addr del " .. device[pId] .. "/24 dev " .. interface)
+    if execCmd("ip addr | grep " .. deviceData.device[pId]) ~= "" then
+      os.execute("ip addr del " .. deviceData.device[pId] .. "/24 dev " .. deviceData.interface)
     end
   end
-  for i = 2, 5 do
-    if test.mobileConnections[i] then removeDevice(i) end
+  for i = 1, 5 do
+    if deviceData.device[i] then removeDevice(i) end
   end
   actions.run.wait(2000)
 end
