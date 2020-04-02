@@ -190,7 +190,10 @@ function common.connectMobileEx(pMobConnId)
     end
   end
   addDevice(pMobConnId)
-  commonSmoke.createConnection(pMobConnId, device[pMobConnId])
+  actions.mobile.connect = function(pId)
+    return commonSmoke.createConnection(pId, device[pId])
+  end
+  return common.connectMobile(pMobConnId)
 end
 
 function common.postconditions()
