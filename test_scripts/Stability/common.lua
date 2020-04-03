@@ -208,6 +208,12 @@ function common.postconditions()
 end
 
 function common.ptuViaHMI()
+  local function getPathAndName(pPathToFile)
+    local pos = string.find(pPathToFile, "/[^/]*$")
+    local path = string.sub(pPathToFile, 1, pos)
+    local name = string.sub(pPathToFile, pos + 1)
+    return path, name
+  end
   local function getPTUFromPTS()
     local pTbl = actions.sdl.getPTS()
     if type(pTbl.policy_table) == "table" then
@@ -236,6 +242,11 @@ function common.ptuViaHMI()
       utils.tableToJsonFile(ptuTable, ptuFileName)
       actions.hmi.getConnection():ExpectRequest("VehicleInfo.GetVehicleData", { odometer = true })
       actions.hmi.getConnection():ExpectNotification("SDL.OnStatusUpdate", { status = "UP_TO_DATE" })
+      if config.remoteConnection.enabled then
+        local c = utils.readFile(ptuFileName)
+        local p, n = getPathAndName(ptuFileName)
+        ATF.remoteUtils.file:UpdateFileContent(p, n, c)
+      end
       actions.hmi.getConnection():SendNotification("SDL.OnReceivedPolicyUpdate", { policyfile = ptuFileName })
       actions.run.runAfter(function() os.remove(ptuFileName) end, 250)
       for _, session in pairs(actions.mobile.getApps()) do
