@@ -99,5 +99,7 @@ for i = 1, numOfTries do
   common.Step("PerformAudioPassThru " .. i, performAudioPassThru, { allParams })
 end
 
+common.Step("IDLE", common.IDLE, { 1000, 300 })
+
 common.Title("Postconditions")
 common.Step("Stop SDL", common.postconditions)
