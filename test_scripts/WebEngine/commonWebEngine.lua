@@ -17,6 +17,7 @@ config.defaultProtocolVersion = 2
 local common = {}
 common.Title = runner.Title
 common.Step = runner.Step
+common.testSettings = runner.testSettings
 common.start = actions.start
 common.stopSDL = actions.sdl.stop
 common.getHMIConnection = actions.hmi.getConnection
@@ -46,6 +47,8 @@ common.runAfter = actions.run.runAfter
 common.unRegisterApp = actions.app.unRegister
 common.backupSDLIniFile = actions.sdl.backupSDLIniFile
 common.setSDLIniParameter = actions.sdl.setSDLIniParameter
+common.disconnectedEvent = events.disconnectedEvent
+common.getHMIAppId = actions.getHMIAppId
 
 --[[ Local Variables ]]
 common.defaultAppProperties = {
