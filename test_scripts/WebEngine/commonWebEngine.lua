@@ -315,4 +315,81 @@ function common.checkUpdateAppList(pPolicyAppID, pTimes, pExpNumOfApps)
   common.wait()
 end
 
+--[[ @getOnSystemCapabilityParams: Provide default parameters for 'OnSystemCapabilityParams' RPC
+--! @parameters:
+--! pMaxNumOfWidgetWindows: maximum number of widget windows
+--! @return: parameters for 'OnSystemCapabilityParams' RPC
+--]]
+function common.getOnSystemCapabilityParams(pMaxNumOfWidgetWindows)
+  if not pMaxNumOfWidgetWindows then pMaxNumOfWidgetWindows = 5 end
+  return {
+    systemCapability = {
+      systemCapabilityType = "DISPLAYS",
+      displayCapabilities = {
+        {
+          displayName = "displayName",
+          windowTypeSupported = {
+            {
+              type = "MAIN",
+              maximumNumberOfWindows = 1
+            },
+            {
+              type = "WIDGET",
+              maximumNumberOfWindows = pMaxNumOfWidgetWindows
+            }
+          },
+          windowCapabilities = {
+            {
+              windowID = 1,
+              textFields = {
+                {
+                  name = "mainField1",
+                  characterSet = "TYPE2SET",
+                  width = 1,
+                  rows = 1
+                }
+              },
+              imageFields = {
+                {
+                  name = "choiceImage",
+                  imageTypeSupported = { "GRAPHIC_PNG"
+                  },
+                  imageResolution = {
+                    resolutionWidth = 35,
+                    resolutionHeight = 35
+                  }
+                }
+              },
+              imageTypeSupported = {
+                "STATIC"
+              },
+              templatesAvailable = {
+                "Template1", "Template2", "Template3", "Template4", "Template5"
+              },
+              numCustomPresetsAvailable = 100,
+              buttonCapabilities = {
+                {
+                  longPressAvailable = true,
+                  name = "VOLUME_UP",
+                  shortPressAvailable = true,
+                  upDownAvailable = false
+                }
+              },
+              softButtonCapabilities = {
+                {
+                  shortPressAvailable = true,
+                  longPressAvailable = true,
+                  upDownAvailable = true,
+                  imageSupported = true,
+                  textSupported = true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+end
+
 return common
