@@ -15,6 +15,9 @@
 ---------------------------------------------------------------------------------------------------
 --[[ General test configuration ]]
 config.defaultMobileAdapterType = "WS"
+config.application1.registerAppInterfaceParams.appHMIType = { "WEB_VIEW" }
+config.application1.registerAppInterfaceParams.syncMsgVersion.majorVersion = 6
+config.application1.registerAppInterfaceParams.syncMsgVersion.minorVersion = 2
 
 --[[ Required Shared libraries ]]
 local events = require("events")
@@ -44,6 +47,7 @@ common.Step("Connect WebEngine device", common.connectWebEngine,
     { 1, config.defaultMobileAdapterType })
 common.Step("Register App", common.registerApp)
 common.Step("OnExitApplication", onExitApp)
+-- common.Step("Register App", common.registerApp)
 
 common.Title("Postconditions")
 common.Step("Stop SDL", common.postconditions)
